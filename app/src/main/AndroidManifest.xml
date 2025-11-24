@@ -10,6 +10,45 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Espritrealstateapp" />
+        android:theme="@style/Theme.RealEstateApp"
+        tools:targetApi="31">
+
+        <activity
+            android:name=".screens.DetailsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.SearchActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.HomeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.SignUpActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.LoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.ListingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.AddPropertyActivity"
+            android:exported="false" />
+
+        <!-- NEW: CategoryActivity -->
+        <activity
+            android:name=".screens.CategoryActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
 
 </manifest>
