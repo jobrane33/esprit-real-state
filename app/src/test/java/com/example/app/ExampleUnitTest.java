@@ -1,4 +1,4 @@
-package com.example.esprit_realstate_app;
+package com.example.app;
 
 import org.junit.Test;
 
