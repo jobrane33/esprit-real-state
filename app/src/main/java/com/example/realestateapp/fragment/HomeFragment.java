@@ -43,7 +43,7 @@ public class HomeFragment extends Fragment {
         categoryList = new ArrayList<>();
         categoryList.add(new Category(R.drawable.villa, "Villa"));
         categoryList.add(new Category(R.drawable.office, "Office"));
-        categoryList.add(new Category(R.drawable.shop, "Shop"));
+        categoryList.add(new Category(R.drawable.shop, "shop"));
         categoryList.add(new Category(R.drawable.apartment, "Apartment"));
 
         categoryAdapter = new CategoryAdapter(getContext(), categoryList, new ItemListener() {
