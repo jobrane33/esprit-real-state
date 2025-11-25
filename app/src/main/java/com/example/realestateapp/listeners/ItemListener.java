@@ -2,5 +2,8 @@ package com.example.realestateapp.listeners;
 
 public interface ItemListener {
 
-    void OnItemPosition(int position);
-}
+
+
+        void onItemClick(int position); // <-- This must match exactly
+    }
+
