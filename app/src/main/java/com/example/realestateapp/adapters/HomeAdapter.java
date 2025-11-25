@@ -1,6 +1,5 @@
 package com.example.realestateapp.adapters;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,12 +21,9 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
 
     private Context context;
     private List<Item> itemList;
-
     private ItemListener itemListener;
 
-
-
-    public HomeAdapter(Context context, List<Item> itemList , ItemListener itemListener) {
+    public HomeAdapter(Context context, List<Item> itemList, ItemListener itemListener) {
         this.context = context;
         this.itemList = itemList;
         this.itemListener = itemListener;
@@ -36,22 +32,17 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.top_deals,parent,false);
+        View view = LayoutInflater.from(context).inflate(R.layout.top_deals, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-
         Item item = itemList.get(position);
-
-        holder.price.setText(itemList.get(position).getPrice());
-        holder.location.setText(itemList.get(position).getLocation());
-        holder.shortDescription.setText(itemList.get(position).getShortDescription());
-
-        // Load background image using Glide
-        Glide.with(context).load(item.getImageUri()).into(holder.backgroundImageView);
-
+        holder.price.setText(item.getPrice());
+        holder.location.setText(item.getLocation());
+        holder.shortDescription.setText(item.getShortDescription());
+        Glide.with(context).load(item.getImageResId()).into(holder.backgroundImageView);
     }
 
     @Override
@@ -59,26 +50,24 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
         return itemList.size();
     }
 
+    public void updateList(List<Item> newList) {
+        itemList = newList;
+        notifyDataSetChanged();
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
+        TextView price, location, shortDescription;
+        ImageView backgroundImageView;
 
-        private TextView price;
-        private TextView location;
-        private TextView shortDescription;
-        private ImageView backgroundImageView;
-
-
-        @SuppressLint("WrongViewCast")
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-
             price = itemView.findViewById(R.id.price);
             location = itemView.findViewById(R.id.location);
             shortDescription = itemView.findViewById(R.id.short_description);
             backgroundImageView = itemView.findViewById(R.id.bg);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+            itemView.setOnClickListener(v -> {
+                if (itemListener != null) {
                     itemListener.OnItemPosition(getAdapterPosition());
                 }
             });

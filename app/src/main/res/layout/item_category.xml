@@ -1,22 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="8dp"
-    android:gravity="center">
+    android:padding="8dp">
 
     <ImageView
         android:id="@+id/category_image"
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:scaleType="centerCrop"
-        android:src="@drawable/ic_launcher_background" />
+        android:src="@drawable/baseline_house_24"
+        android:background="@drawable/bg_category"
+        android:contentDescription="Category Image" />
 
     <TextView
-        android:id="@+id/category_name"
+        android:id="@+id/category_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Category"
-        android:textSize="14sp"
-        android:layout_marginTop="4dp"/>
+        android:text="Villa"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_gravity="center"
+        android:layout_marginTop="4dp" />
+
 </LinearLayout>
