@@ -91,6 +91,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder
             titleText = itemView.findViewById(R.id.property_title);
             priceText = itemView.findViewById(R.id.property_price);
             locationText = itemView.findViewById(R.id.property_location);
+
         }
     }
 }

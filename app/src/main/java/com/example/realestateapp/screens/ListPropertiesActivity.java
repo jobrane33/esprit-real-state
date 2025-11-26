@@ -23,6 +23,12 @@ public class ListPropertiesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_properties);
+        recyclerView = findViewById(R.id.recyclerViewProperties);
+        propertyList = new ArrayList<>();
+        adapter = new PropertyAdapter(this, propertyList);
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
 
         recyclerView = findViewById(R.id.recyclerViewProperties);
         db = FirebaseFirestore.getInstance();
