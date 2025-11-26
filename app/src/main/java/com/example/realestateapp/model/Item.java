@@ -33,4 +33,14 @@ public class Item {
     public String getOwnerName() { return ownerName; }
     public String getOwnerContact() { return ownerContact; }
     public String getDescription() { return description; }
+    public void setTitle(String title) { this.title = title; }
+    public void setLocation(String location) { this.location = location; }
+    public void setShortDescription(String shortDescription) { this.shortDescription = shortDescription; }
+    public void setPrice(String price) { this.price = price; }
+    public void setCategory(String category) { this.category = category; }
+    public void setImageResId(int imageResId) { this.imageResId = imageResId; }
+    public void setOwnerName(String ownerName) { this.ownerName = ownerName; }
+    public void setOwnerContact(String ownerContact) { this.ownerContact = ownerContact; }
+    public void setDescription(String description) { this.description = description; }
 }
+
