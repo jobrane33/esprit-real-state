@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.realestateapp.R;
 import com.example.realestateapp.listeners.ItemListener;
 import com.example.realestateapp.model.Item;
@@ -38,12 +39,30 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder
     @Override
     public void onBindViewHolder(@NonNull HomeViewHolder holder, int position) {
         Item item = itemList.get(position);
+
         holder.title.setText(item.getTitle());
         holder.location.setText(item.getLocation());
         holder.price.setText(item.getPrice());
-        holder.image.setImageResource(item.getImageResId());
 
-        holder.itemView.setOnClickListener(v -> listener.onItemClick(position));
+        // Load image: Firebase URL or drawable, with placeholder
+        if (item.getImageUrl() != null) {
+            Glide.with(context)
+                    .load(item.getImageUrl())
+                    .placeholder(R.drawable.hom1) // shown while loading
+                    .error(R.drawable.hom1)       // shown if failed
+                    .into(holder.image);
+        } else if (item.getImageResId() != null) {
+            holder.image.setImageResource(item.getImageResId());
+        } else {
+            holder.image.setImageResource(R.drawable.hom1); // fallback
+        }
+
+        // Click listener
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onItemClick(position);
+            }
+        });
     }
 
     @Override

@@ -97,11 +97,16 @@ public class AddPropertyActivity extends AppCompatActivity {
             db.collection("Properties").add(propertyData)
                     .addOnSuccessListener(documentReference -> {
                         Toast.makeText(this, "Property added successfully", Toast.LENGTH_SHORT).show();
-                        clearForm();
+                        // Rediriger vers Home
+                        Intent intent = new Intent(AddPropertyActivity.this, HomeActivity.class); // ou activity qui contient HomeFragment
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        finish();
                     })
                     .addOnFailureListener(e ->
                             Toast.makeText(this, "Failed to add property", Toast.LENGTH_SHORT).show()
                     );
+
         });
     }
 

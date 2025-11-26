@@ -41,21 +41,19 @@ public class PropertyHomeAdapter extends RecyclerView.Adapter<PropertyHomeAdapte
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Property property = propertyList.get(position);
-
         holder.propertyName.setText(property.getTitle());
         holder.propertyLocation.setText(property.getLocation());
         holder.propertyPrice.setText(property.getPrice());
 
-        // Load image using Glide
-        Glide.with(context).load(property.getImageResId()).into(holder.propertyImage);
+        // Load image (for Property class, usually drawable)
+        holder.propertyImage.setImageResource(property.getImageResId());
 
-        // Click listener on the item
         holder.itemView.setOnClickListener(v -> {
             if (itemListener != null) {
-                itemListener.onItemClick(position); // Trigger listener in fragment/activity
+                itemListener.onItemClick(position);
             }
 
-            // Optional: open ListingsActivity by category
+            // Optional: open ListingsActivity
             Intent intent = new Intent(context, ListingsActivity.class);
             intent.putExtra("category", property.getCategory());
             context.startActivity(intent);
