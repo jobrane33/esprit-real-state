@@ -19,7 +19,6 @@ import com.example.realestateapp.adapters.HomeAdapter;
 import com.example.realestateapp.model.Category;
 import com.example.realestateapp.model.Item;
 import com.example.realestateapp.screens.DetailsActivity;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -74,17 +73,24 @@ public class HomeFragment extends Fragment {
 
     private void setupRecyclerView() {
         homeAdapter = new HomeAdapter(getContext(), allProperties, position -> {
-            Item clickedItem = homeAdapter.getItem(position); // <-- correct
+            Item clickedItem = homeAdapter.getItem(position);
 
             Intent intent = new Intent(getContext(), DetailsActivity.class);
             intent.putExtra("location", clickedItem.getLocation());
             intent.putExtra("price", clickedItem.getPrice());
             intent.putExtra("shortdescription", clickedItem.getShortDescription());
-            intent.putExtra("imageuri", clickedItem.getImageUrl() != null ? clickedItem.getImageUrl() : String.valueOf(clickedItem.getImageResId()));
             intent.putExtra("description", clickedItem.getDescription());
             intent.putExtra("contactno", clickedItem.getOwnerContact());
-            intent.putExtra("type", clickedItem.getCategory()); // Rent/Sell or category
+            intent.putExtra("type", clickedItem.getType());
             intent.putExtra("ownername", clickedItem.getOwnerName());
+
+            // Pass Firebase URL or drawable ID
+            if (clickedItem.getImageUrl() != null && !clickedItem.getImageUrl().isEmpty()) {
+                intent.putExtra("imageUrl", clickedItem.getImageUrl());
+            } else {
+                intent.putExtra("imageResId", clickedItem.getImageResId());
+            }
+
             startActivity(intent);
         });
 
@@ -94,12 +100,12 @@ public class HomeFragment extends Fragment {
 
     private void addStaticProperties() {
         allProperties.add(new Item("Villa in City Center","City Center","Luxury villa","$500,000",
-                "Villa","Sell",R.drawable.villa,"Mr. John Dae","+91-852475935",
-                "Welcome to our luxury villa located in the heart of the city."));
+                "Villa","Sell",null,"Mr. John Dae","+91-852475935",
+                "Welcome to our luxury villa located in the heart of the city.", R.drawable.villa));
 
         allProperties.add(new Item("Office Space","Downtown","Spacious office","$300,000",
-                "Office","Rent",R.drawable.office,"Ms. Jane Doe","+91-987654321",
-                "Modern office space suitable for startups and businesses."));
+                "Office","Rent",null,"Ms. Jane Doe","+91-987654321",
+                "Modern office space suitable for startups and businesses.", R.drawable.office));
 
         homeAdapter.updateList(allProperties);
     }
@@ -114,13 +120,14 @@ public class HomeFragment extends Fragment {
                     String price = doc.getString("price");
                     String category = doc.getString("category");
                     String type = doc.getString("type");
-                    String imageUrl = doc.getString("imageUri");
+                    String imageUrl = doc.getString("imageUri"); // Must be Firebase download URL
                     String ownerName = doc.getString("ownername");
                     String ownerContact = doc.getString("contactno");
                     String description = doc.getString("description");
 
                     Item property = new Item(title, location, shortDescription, price,
                             category, type, imageUrl, ownerName, ownerContact, description);
+
                     allProperties.add(property);
                 }
                 homeAdapter.updateList(allProperties);

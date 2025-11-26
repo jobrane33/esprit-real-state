@@ -47,11 +47,13 @@ public class DetailsActivity extends AppCompatActivity {
             String location = intent.getStringExtra("location");
             String price = intent.getStringExtra("price");
             String shortdescription = intent.getStringExtra("shortdescription");
-            String imageuri = intent.getStringExtra("imageuri");
             String description = intent.getStringExtra("description");
             String contactno = intent.getStringExtra("contactno");
-            String type = intent.getStringExtra("type"); // Correct
+            String type = intent.getStringExtra("type");
             String ownername = intent.getStringExtra("ownername");
+
+            String imageUrl = intent.getStringExtra("imageUrl");
+            int imageResId = intent.getIntExtra("imageResId", 0);
 
             priceTextView.setText(price);
             shortDescriptionTextView.setText(shortdescription);
@@ -61,13 +63,16 @@ public class DetailsActivity extends AppCompatActivity {
             rentSellTextView.setText(type);
             locationTextView.setText(location);
 
-            if (imageuri != null && !imageuri.isEmpty()) {
+            // Load image: Firebase or local drawable
+            if (imageUrl != null && !imageUrl.isEmpty()) {
                 Glide.with(this)
-                        .load(imageuri)
+                        .load(imageUrl)
                         .placeholder(R.drawable.hom1)
                         .error(R.drawable.hom1)
                         .centerCrop()
                         .into(propertyImageView);
+            } else if (imageResId != 0) {
+                propertyImageView.setImageResource(imageResId);
             } else {
                 propertyImageView.setImageResource(R.drawable.hom1);
             }
@@ -79,6 +84,7 @@ public class DetailsActivity extends AppCompatActivity {
             });
 
             backButton.setOnClickListener(v -> finish());
+
         } else {
             Toast.makeText(this, "Failed to retrieve property details", Toast.LENGTH_SHORT).show();
             finish();
