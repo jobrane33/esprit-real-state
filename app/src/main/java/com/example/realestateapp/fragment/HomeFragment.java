@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.realestateapp.R;
 import com.example.realestateapp.adapters.CategoryAdapter;
 import com.example.realestateapp.adapters.HomeAdapter;
-import com.example.realestateapp.listeners.ItemListener;
 import com.example.realestateapp.model.Category;
 import com.example.realestateapp.model.Item;
 import com.example.realestateapp.screens.DetailsActivity;
@@ -50,13 +49,12 @@ public class HomeFragment extends Fragment {
 
         setupCategories();
         setupRecyclerView();
-        addStaticProperties();    // <-- Add hardcoded drawable properties
-        loadPropertiesFromFirestore(); // <-- Fetch Firebase properties
+        addStaticProperties();
+        loadPropertiesFromFirestore();
 
         return view;
     }
 
-    // --- Categories ---
     private void setupCategories() {
         categoryList = new ArrayList<>();
         categoryList.add(new Category(R.drawable.villa, "Villa"));
@@ -74,21 +72,19 @@ public class HomeFragment extends Fragment {
                 new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
     }
 
-    // --- RecyclerView & Adapter ---
     private void setupRecyclerView() {
         homeAdapter = new HomeAdapter(getContext(), allProperties, position -> {
-            Item clickedItem = allProperties.get(position);
+            Item clickedItem = homeAdapter.getItem(position); // <-- correct
 
             Intent intent = new Intent(getContext(), DetailsActivity.class);
             intent.putExtra("location", clickedItem.getLocation());
             intent.putExtra("price", clickedItem.getPrice());
             intent.putExtra("shortdescription", clickedItem.getShortDescription());
-            intent.putExtra("imageuri", clickedItem.getImageUrl()); // Firebase URL
+            intent.putExtra("imageuri", clickedItem.getImageUrl() != null ? clickedItem.getImageUrl() : String.valueOf(clickedItem.getImageResId()));
             intent.putExtra("description", clickedItem.getDescription());
             intent.putExtra("contactno", clickedItem.getOwnerContact());
-            intent.putExtra("type", clickedItem.getCategory());
+            intent.putExtra("type", clickedItem.getCategory()); // Rent/Sell or category
             intent.putExtra("ownername", clickedItem.getOwnerName());
-
             startActivity(intent);
         });
 
@@ -96,77 +92,35 @@ public class HomeFragment extends Fragment {
         propertyRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     }
 
-    // --- Static properties from drawable ---
     private void addStaticProperties() {
-        allProperties.add(new Item(
-                "Villa in City Center",
-                "City Center",
-                "Luxury villa",
-                "$500,000",
-                "Villa",
-                R.drawable.villa,
-                "Mr. John Dae",
-                "+91-852475935",
-                "Welcome to our luxury villa located in the heart of the city."
-        ));
+        allProperties.add(new Item("Villa in City Center","City Center","Luxury villa","$500,000",
+                "Villa","Sell",R.drawable.villa,"Mr. John Dae","+91-852475935",
+                "Welcome to our luxury villa located in the heart of the city."));
 
-        allProperties.add(new Item(
-                "Office Space",
-                "Downtown",
-                "Spacious office",
-                "$300,000",
-                "Office",
-                R.drawable.office,
-                "Ms. Jane Doe",
-                "+91-987654321",
-                "Modern office space suitable for startups and businesses."
-        ));
-
-        allProperties.add(new Item(
-                "Shop near Market",
-                "Market Area",
-                "High foot traffic",
-                "$200,000",
-                "Shop",
-                R.drawable.shop,
-                "Mr. Sam Smith",
-                "+91-123456789",
-                "Prime retail shop with excellent visibility near the market."
-        ));
-
-        allProperties.add(new Item(
-                "Apartment with Balcony",
-                "Suburbs",
-                "Nice view",
-                "$150,000",
-                "Apartment",
-                R.drawable.apartment,
-                "Mrs. Mary Johnson",
-                "+91-456789123",
-                "Cozy apartment with balcony overlooking scenic views."
-        ));
+        allProperties.add(new Item("Office Space","Downtown","Spacious office","$300,000",
+                "Office","Rent",R.drawable.office,"Ms. Jane Doe","+91-987654321",
+                "Modern office space suitable for startups and businesses."));
 
         homeAdapter.updateList(allProperties);
     }
 
-    // --- Firebase Firestore properties ---
     private void loadPropertiesFromFirestore() {
-        CollectionReference propertiesRef = db.collection("Properties");
-        propertiesRef.get().addOnCompleteListener(task -> {
+        db.collection("Properties").get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot doc : task.getResult()) {
                     String title = doc.getString("title");
                     String location = doc.getString("location");
                     String shortDescription = doc.getString("shortdescription");
                     String price = doc.getString("price");
-                    String category = doc.getString("category"); // <-- FIXED: read "category"
+                    String category = doc.getString("category");
+                    String type = doc.getString("type");
                     String imageUrl = doc.getString("imageUri");
                     String ownerName = doc.getString("ownername");
                     String ownerContact = doc.getString("contactno");
                     String description = doc.getString("description");
 
-                    Item property = new Item(title, location, shortDescription, price, category,
-                            imageUrl, ownerName, ownerContact, description);
+                    Item property = new Item(title, location, shortDescription, price,
+                            category, type, imageUrl, ownerName, ownerContact, description);
                     allProperties.add(property);
                 }
                 homeAdapter.updateList(allProperties);
@@ -176,7 +130,6 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    // --- Filter by category ---
     private void filterPropertiesByCategory(String category) {
         List<Item> filteredList = new ArrayList<>();
         for (Item item : allProperties) {

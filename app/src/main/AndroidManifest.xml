@@ -35,10 +35,6 @@
             android:name=".screens.AddPropertyActivity"
             android:exported="false" />
 
-        <!-- NEW: CategoryActivity -->
-        <activity
-            android:name=".screens.CategoryActivity"
-            android:exported="false" />
 
         <activity
             android:name=".MainActivity"
