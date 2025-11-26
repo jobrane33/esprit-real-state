@@ -8,14 +8,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.realestateapp.R;
-import com.example.realestateapp.adapters.FavouriteAdapter;
-import com.example.realestateapp.model.FavouriteProperty;
+import com.example.realestateapp.adapters.FavAdapter;
+import com.example.realestateapp.model.FavProperty;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -24,8 +23,8 @@ import java.util.List;
 
 public class FavouriteFragment extends Fragment {
     private RecyclerView favouriteRecyclerView;
-    private FavouriteAdapter favouriteAdapter;
-    private List<FavouriteProperty> favouriteList;
+    private FavAdapter favAdapter;
+    private List<FavProperty> favouriteList;
 
     // Override onCreateView to inflate the layout for this fragment
     @Override
@@ -39,10 +38,10 @@ public class FavouriteFragment extends Fragment {
         favouriteList = new ArrayList<>();
 
         // Set up RecyclerView adapter
-        favouriteAdapter = new FavouriteAdapter(getContext(), favouriteList);
+        favAdapter = new FavAdapter(getContext(), favouriteList);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         favouriteRecyclerView.setLayoutManager(layoutManager);
-        favouriteRecyclerView.setAdapter(favouriteAdapter);
+        favouriteRecyclerView.setAdapter(favAdapter);
 
         // Fetch data from Firebase and update the adapter
         fetchFavoriteProperties();
@@ -60,6 +59,7 @@ public class FavouriteFragment extends Fragment {
                         favouriteList.clear(); // Clear the list before adding new data
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             // Convert document snapshot to your FavoriteProperty model class
+                            String id = document.getString("id");
                             String location = document.getString("location");
                             String type = document.getString("type");
                             String price = document.getString("price");
@@ -70,10 +70,10 @@ public class FavouriteFragment extends Fragment {
                             String contactno = document.getString("contactno");
 
                             // Create a new FavouriteProperty object
-                            FavouriteProperty favouriteProperty = new FavouriteProperty(imageuri,location, type, price, shortdescription,ownername,description,contactno);
+                            FavProperty favouriteProperty = new FavProperty(id,imageuri,location, type, price, shortdescription,ownername,description,contactno);
                             favouriteList.add(favouriteProperty);
                         }
-                        favouriteAdapter.notifyDataSetChanged(); // Notify adapter that data has changed
+                        favAdapter.notifyDataSetChanged(); // Notify adapter that data has changed
                     } else {
                         Log.d(TAG, "Error getting favorite properties: ", task.getException());
                     }
