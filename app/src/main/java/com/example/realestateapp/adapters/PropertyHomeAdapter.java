@@ -63,6 +63,7 @@ public class PropertyHomeAdapter extends RecyclerView.Adapter<PropertyHomeAdapte
 
             // Create FavProperty from Property
             FavProperty fav = new FavProperty(
+                    property.getTitle(),
                     property.getShortDescription(),   // assuming imageResId is a URL or resource
                     property.getLocation(),
                     property.getCategory(),     // type/category

@@ -41,13 +41,11 @@ public class FavActivity extends AppCompatActivity {
     }
 
     private void loadFavorites() {
-        favoritesRepo.getFavoritesSnapshot(querySnapshot -> {
+        favoritesRepo.getFavorites(favorites -> {
             favList.clear();
-            for (DocumentSnapshot doc : querySnapshot) {
-                FavProperty fav = doc.toObject(FavProperty.class);
-                favList.add(fav);
-            }
+            favList.addAll(favorites);
             favAdapter.notifyDataSetChanged();
         });
+
     }
 }

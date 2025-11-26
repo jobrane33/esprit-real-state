@@ -9,7 +9,7 @@
         android:id="@+id/favorite_delete"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:src="@drawable/ic_delete"
+        android:src="@drawable/baseline_delete_24"
         android:contentDescription="Delete Fav"/>
 
     <!-- Property image -->
