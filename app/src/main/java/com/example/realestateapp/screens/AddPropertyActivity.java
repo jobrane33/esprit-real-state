@@ -64,7 +64,7 @@ public class AddPropertyActivity extends AppCompatActivity {
         back_button.setOnClickListener(v -> finish());
 
         // --- Setup Spinner ---
-        String[] categories = {"Home", "Villa", "Flat", "Shop"};
+        String[] categories = {"Apartment", "Villa", "Office", "Shop"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, categories);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
