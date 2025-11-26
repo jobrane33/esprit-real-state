@@ -24,7 +24,6 @@ public class Item {
         this.description = description;
     }
 
-    // Getters
     public String getTitle() { return title; }
     public String getLocation() { return location; }
     public String getShortDescription() { return shortDescription; }
