@@ -22,6 +22,7 @@ import com.bumptech.glide.Glide;
 import com.example.realestateapp.R;
 import com.example.realestateapp.screens.AddPropertyActivity;
 import com.example.realestateapp.screens.CategoryActivity;
+import com.example.realestateapp.screens.ListPropertiesActivity;
 import com.example.realestateapp.screens.LoginActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -41,7 +42,7 @@ public class AccountFragment extends Fragment {
     private CircleImageView userProfile;
     private EditText userName, userEmail;
     private AppCompatButton updateButton, signOutButton;
-    private Button addProperty, manageCategoriesBtn;
+    private Button addProperty;
 
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri imageUri;
@@ -70,12 +71,16 @@ public class AccountFragment extends Fragment {
         updateButton = view.findViewById(R.id.update_button);
         signOutButton = view.findViewById(R.id.sign_out);
         addProperty = view.findViewById(R.id.add_property);
-        manageCategoriesBtn = view.findViewById(R.id.btn_manage_categories);
 
         fetchUserData();
 
         // Profile image picker
         userProfile.setOnClickListener(v -> chooseImage());
+        Button listPropertiesBtn = view.findViewById(R.id.btn_list_properties);
+        listPropertiesBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), ListPropertiesActivity.class);
+            startActivity(intent);
+        });
 
         // Update user data
         updateButton.setOnClickListener(v -> updateUserData());
@@ -89,11 +94,7 @@ public class AccountFragment extends Fragment {
             startActivity(intent);
         });
 
-        // Manage categories
-        manageCategoriesBtn.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), CategoryActivity.class);
-            startActivity(intent);
-        });
+
     }
 
     private void fetchUserData() {

@@ -1,6 +1,7 @@
 package com.example.realestateapp.model;
 
 public class Property {
+    private  String type;
     private String title;
     private String location;
     private String price;
@@ -25,6 +26,16 @@ public class Property {
     // Constructeur pour image Firebase
     public Property(String title, String location, String price, String category, String imageUrl) {
         this.title = title;
+        this.location = location;
+        this.price = price;
+        this.category = category;
+        this.imageUrl = imageUrl;
+        this.imageResId = null;
+    }
+
+    public Property(String title, String category, String type, String price, String location, String imageUrl) {
+        this.title = title;
+        this.type=type;
         this.location = location;
         this.price = price;
         this.category = category;

@@ -22,6 +22,9 @@
         <activity
             android:name=".screens.HomeActivity"
             android:exported="false" />
+        <activity android:name=".screens.ListPropertiesActivity" />
+        <activity android:name=".screens.UpdatePropertyActivity" />
+
         <activity
             android:name=".screens.SignUpActivity"
             android:exported="false" />
