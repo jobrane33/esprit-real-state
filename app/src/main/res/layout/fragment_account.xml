@@ -55,7 +55,7 @@
         app:layout_constraintStart_toStartOf="@+id/user_email"
         app:layout_constraintEnd_toEndOf="@+id/user_email" />
 
-    
+
     <Button
         android:id="@+id/add_property"
         android:layout_width="0dp"
@@ -64,9 +64,7 @@
         android:background="@drawable/button_bg_property"
         android:text="Add Your Property"
         android:textColor="@color/white"
-        app:layout_constraintTop_toBottomOf="@+id/btn_manage_categories"
-        app:layout_constraintStart_toStartOf="@+id/btn_manage_categories"
-        app:layout_constraintEnd_toEndOf="@+id/btn_manage_categories" />
+/>
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/sign_out"
