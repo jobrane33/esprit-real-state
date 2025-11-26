@@ -2,9 +2,12 @@ package com.example.realestateapp.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -32,7 +35,9 @@ public class HomeFragment extends Fragment {
     private HomeAdapter homeAdapter;
     private List<Category> categoryList;
     private List<Item> allProperties;
+    private List<Item> filteredProperties; // For search
     private FirebaseFirestore db;
+    private EditText searchEditText;
 
     @Nullable
     @Override
@@ -42,14 +47,17 @@ public class HomeFragment extends Fragment {
 
         categoryRecyclerView = view.findViewById(R.id.top_deal_RV1);
         propertyRecyclerView = view.findViewById(R.id.top_deal_RV);
+        searchEditText = view.findViewById(R.id.search);
 
         db = FirebaseFirestore.getInstance();
         allProperties = new ArrayList<>();
+        filteredProperties = new ArrayList<>();
 
         setupCategories();
         setupRecyclerView();
         addStaticProperties();
         loadPropertiesFromFirestore();
+        setupSearch();
 
         return view;
     }
@@ -63,7 +71,7 @@ public class HomeFragment extends Fragment {
 
         categoryAdapter = new CategoryAdapter(getContext(), categoryList, position -> {
             String selectedCategory = categoryList.get(position).getTitle();
-            filterPropertiesByCategory(selectedCategory);
+            filterByCategory(selectedCategory);
         });
 
         categoryRecyclerView.setAdapter(categoryAdapter);
@@ -72,7 +80,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupRecyclerView() {
-        homeAdapter = new HomeAdapter(getContext(), allProperties, position -> {
+        homeAdapter = new HomeAdapter(getContext(), filteredProperties, position -> {
             Item clickedItem = homeAdapter.getItem(position);
 
             Intent intent = new Intent(getContext(), DetailsActivity.class);
@@ -84,9 +92,8 @@ public class HomeFragment extends Fragment {
             intent.putExtra("type", clickedItem.getType());
             intent.putExtra("ownername", clickedItem.getOwnerName());
 
-            // Pass Firebase URL or drawable ID
             if (clickedItem.getImageUrl() != null && !clickedItem.getImageUrl().isEmpty()) {
-                intent.putExtra("imageUrl", clickedItem.getImageUrl());
+                intent.putExtra("imageuri", clickedItem.getImageUrl());
             } else {
                 intent.putExtra("imageResId", clickedItem.getImageResId());
             }
@@ -107,43 +114,68 @@ public class HomeFragment extends Fragment {
                 "Office","Rent",null,"Ms. Jane Doe","+91-987654321",
                 "Modern office space suitable for startups and businesses.", R.drawable.office));
 
-        homeAdapter.updateList(allProperties);
+        filteredProperties.clear();
+        filteredProperties.addAll(allProperties);
+        homeAdapter.updateList(filteredProperties);
     }
 
     private void loadPropertiesFromFirestore() {
         db.collection("Properties").get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot doc : task.getResult()) {
-                    String title = doc.getString("title");
-                    String location = doc.getString("location");
-                    String shortDescription = doc.getString("shortdescription");
-                    String price = doc.getString("price");
-                    String category = doc.getString("category");
-                    String type = doc.getString("type");
-                    String imageUrl = doc.getString("imageUri"); // Must be Firebase download URL
-                    String ownerName = doc.getString("ownername");
-                    String ownerContact = doc.getString("contactno");
-                    String description = doc.getString("description");
-
-                    Item property = new Item(title, location, shortDescription, price,
-                            category, type, imageUrl, ownerName, ownerContact, description);
-
+                    Item property = new Item(
+                            doc.getString("title"),
+                            doc.getString("location"),
+                            doc.getString("shortdescription"),
+                            doc.getString("price"),
+                            doc.getString("category"),
+                            doc.getString("type"),
+                            doc.getString("imageUri"),
+                            doc.getString("ownername"),
+                            doc.getString("contactno"),
+                            doc.getString("description"),
+                            0
+                    );
                     allProperties.add(property);
                 }
-                homeAdapter.updateList(allProperties);
+                filteredProperties.clear();
+                filteredProperties.addAll(allProperties);
+                homeAdapter.updateList(filteredProperties);
             } else {
                 Toast.makeText(getContext(), "Failed to load properties", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void filterPropertiesByCategory(String category) {
-        List<Item> filteredList = new ArrayList<>();
+    private void filterByCategory(String category) {
+        filteredProperties.clear();
         for (Item item : allProperties) {
             if (item.getCategory() != null && item.getCategory().equals(category)) {
-                filteredList.add(item);
+                filteredProperties.add(item);
             }
         }
-        homeAdapter.updateList(filteredList);
+        homeAdapter.updateList(filteredProperties);
+    }
+
+    private void setupSearch() {
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String query = s.toString().toLowerCase().trim();
+                filteredProperties.clear();
+                for (Item item : allProperties) {
+                    if (item.getTitle() != null && item.getTitle().toLowerCase().contains(query)) {
+                        filteredProperties.add(item);
+                    }
+                }
+                homeAdapter.updateList(filteredProperties);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) { }
+        });
     }
 }
