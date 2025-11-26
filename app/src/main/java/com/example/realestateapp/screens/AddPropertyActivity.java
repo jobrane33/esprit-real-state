@@ -58,12 +58,6 @@ public class AddPropertyActivity extends AppCompatActivity {
         buttonSubmit = findViewById(R.id.buttonSubmit);
         back_button = findViewById(R.id.back_button);
 
-        // Null check for debugging
-        if (spinnerCategory == null) {
-            throw new RuntimeException("spinnerCategory is null! Check layout file name and ID.");
-        }
-
-        // --- Firestore ---
         db = FirebaseFirestore.getInstance();
 
         // --- Back button ---
@@ -114,6 +108,7 @@ public class AddPropertyActivity extends AppCompatActivity {
 
         // --- Save to Firestore ---
         Map<String, Object> propertyData = new HashMap<>();
+        propertyData.put("title", shortDescription); // <-- Important: title for display
         propertyData.put("location", location);
         propertyData.put("type", type);
         propertyData.put("description", description);
@@ -121,7 +116,7 @@ public class AddPropertyActivity extends AppCompatActivity {
         propertyData.put("ownername", ownerName);
         propertyData.put("contactno", contactNo);
         propertyData.put("price", price);
-        propertyData.put("category", category);
+        propertyData.put("category", category);      // <-- matches HomeFragment filtering
         propertyData.put("imageUri", imageUri.toString());
 
         db.collection("Properties").add(propertyData)

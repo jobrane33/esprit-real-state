@@ -159,7 +159,7 @@ public class HomeFragment extends Fragment {
                     String location = doc.getString("location");
                     String shortDescription = doc.getString("shortdescription");
                     String price = doc.getString("price");
-                    String category = doc.getString("type"); // or "category"
+                    String category = doc.getString("category"); // <-- FIXED: read "category"
                     String imageUrl = doc.getString("imageUri");
                     String ownerName = doc.getString("ownername");
                     String ownerContact = doc.getString("contactno");
