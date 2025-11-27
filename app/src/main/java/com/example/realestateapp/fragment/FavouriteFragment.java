@@ -60,6 +60,7 @@ public class FavouriteFragment extends Fragment {
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             // Convert document snapshot to your FavoriteProperty model class
                             String id = document.getString("id");
+                            String title = document.getString("title");
                             String location = document.getString("location");
                             String type = document.getString("type");
                             String price = document.getString("price");
@@ -70,7 +71,7 @@ public class FavouriteFragment extends Fragment {
                             String contactno = document.getString("contactno");
 
                             // Create a new FavouriteProperty object
-                            FavProperty favouriteProperty = new FavProperty(id,imageuri,location, type, price, shortdescription,ownername,description,contactno);
+                            FavProperty favouriteProperty = new FavProperty(id,title,imageuri,location, type, price, shortdescription,ownername,description,contactno);
                             favouriteList.add(favouriteProperty);
                         }
                         favAdapter.notifyDataSetChanged(); // Notify adapter that data has changed

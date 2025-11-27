@@ -36,25 +36,36 @@ public class FavAdapter extends RecyclerView.Adapter<FavAdapter.ViewHolder> {
         return new ViewHolder(view);
     }
 
+
+
+
+
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         FavProperty fav = favorites.get(position);
 
-        holder.title.setText(fav.getDescription());
+        holder.title.setText(fav.getTitle());
         holder.location.setText(fav.getLocation());
         holder.price.setText(fav.getPrice());
 
-        Glide.with(context).load(fav.getFavImageUrl()).into(holder.image);
+        // Minimal Glide call, no placeholder/error
+        Glide.with(context)
+                .load(fav.getFavImageUrl())
+                .into(holder.image);
 
-        // --- NEW: Delete favorite ---
-        holder.delete.setOnClickListener(v -> {
-            if (fav.getId() != null) { // make sure FavProperty has an id field
-                favoritesRepo.deleteFavorite(fav.getId());
+        // Heart toggle example (if you added it)
+        holder.heart.setOnClickListener(v -> {
+            boolean isLiked = fav.isLiked();
+            if (isLiked) {
+                holder.heart.setImageResource(R.drawable.like);
+                fav.setLiked(false);
+            } else {
+                holder.heart.setImageResource(R.drawable.like_full);
+                fav.setLiked(true);
             }
-            favorites.remove(position);
-            notifyItemRemoved(position);
         });
     }
+
 
     @Override
     public int getItemCount() {
@@ -63,7 +74,7 @@ public class FavAdapter extends RecyclerView.Adapter<FavAdapter.ViewHolder> {
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView title, location, price;
-        ImageView image, delete; // NEW
+        ImageView image, delete, heart; // <-- added heart
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -71,7 +82,9 @@ public class FavAdapter extends RecyclerView.Adapter<FavAdapter.ViewHolder> {
             location = itemView.findViewById(R.id.favorite_location);
             price = itemView.findViewById(R.id.favorite_price);
             image = itemView.findViewById(R.id.favorite_image);
-            delete = itemView.findViewById(R.id.favorite_delete); // NEW
+            delete = itemView.findViewById(R.id.favorite_delete);
+            heart = itemView.findViewById(R.id.favorite_heart); // <-- NEW
         }
     }
+
 }

@@ -5,25 +5,19 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <ImageView
-        android:id="@+id/favorite_delete"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:src="@drawable/baseline_delete_24"
-        android:contentDescription="Delete Fav"/>
-
     <!-- Property image -->
     <ImageView
         android:id="@+id/favorite_image"
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:scaleType="centerCrop" />
+        android:scaleType="centerCrop"
+        android:layout_marginEnd="8dp"/>
 
     <!-- Text info -->
     <LinearLayout
         android:orientation="vertical"
-        android:layout_marginStart="8dp"
-        android:layout_width="wrap_content"
+        android:layout_weight="1"
+        android:layout_width="0dp"
         android:layout_height="wrap_content">
 
         <TextView
@@ -31,6 +25,8 @@
             android:text="Title"
             android:textStyle="bold"
             android:textSize="16sp"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
@@ -48,5 +44,28 @@
             android:textColor="@color/black"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <!-- Action buttons (heart + delete) -->
+    <LinearLayout
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/favorite_heart"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/like"
+            android:contentDescription="Toggle Favorite"/>
+
+        <ImageView
+            android:id="@+id/favorite_delete"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/baseline_delete_24"
+            android:contentDescription="Delete Favorite"
+            android:layout_marginTop="8dp"/>
     </LinearLayout>
 </LinearLayout>

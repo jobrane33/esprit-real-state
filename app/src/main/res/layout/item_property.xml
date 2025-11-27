@@ -12,13 +12,6 @@
         android:layout_height="wrap_content">
 
         <ImageView
-            android:id="@+id/imgFavorite"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:contentDescription="Button to Favorite"
-            android:src="@drawable/like" />
-
-        <ImageView
             android:id="@+id/property_image"
             android:layout_width="100dp"
             android:layout_height="100dp"
