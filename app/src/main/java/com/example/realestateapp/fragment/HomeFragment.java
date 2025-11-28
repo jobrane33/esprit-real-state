@@ -55,7 +55,6 @@ public class HomeFragment extends Fragment {
 
         setupCategories();
         setupRecyclerView();
-        addStaticProperties();
         loadPropertiesFromFirestore();
         setupSearch();
 

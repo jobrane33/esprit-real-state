@@ -4,7 +4,7 @@ public class Item {
 
     private String title;
     private String location;
-    private String shortDescription;
+    private String shortdescription;
     private String price;
     private String category;       // Villa, Office, etc.
     private String type;           // Sell or Rent
@@ -20,7 +20,7 @@ public class Item {
                 String ownerName, String ownerContact, String description) {
         this.title = title;
         this.location = location;
-        this.shortDescription = shortDescription;
+        this.shortdescription = shortDescription;
         this.price = price;
         this.category = category;
         this.type = type;
@@ -37,7 +37,7 @@ public class Item {
                 String ownerName, String ownerContact, String description, int imageResId) {
         this.title = title;
         this.location = location;
-        this.shortDescription = shortDescription;
+        this.shortdescription = shortDescription;
         this.price = price;
         this.category = category;
         this.type = type;
@@ -51,7 +51,7 @@ public class Item {
     // Getters
     public String getTitle() { return title; }
     public String getLocation() { return location; }
-    public String getShortDescription() { return shortDescription; }
+    public String getShortDescription() { return shortdescription; }
     public String getPrice() { return price; }
     public String getCategory() { return category; }
     public String getType() { return type; }
@@ -64,7 +64,7 @@ public class Item {
     // Setters (if needed)
     public void setTitle(String title) { this.title = title; }
     public void setLocation(String location) { this.location = location; }
-    public void setShortDescription(String shortDescription) { this.shortDescription = shortDescription; }
+    public void setShortDescription(String shortDescription) { this.shortdescription = shortDescription; }
     public void setPrice(String price) { this.price = price; }
     public void setCategory(String category) { this.category = category; }
     public void setType(String type) { this.type = type; }
