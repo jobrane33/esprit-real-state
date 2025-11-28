@@ -179,6 +179,7 @@ public class UpdatePropertyActivity extends AppCompatActivity {
                         db.collection("Properties").document(docId).set(currentProperty)
                                 .addOnSuccessListener(aVoid -> {
                                     Toast.makeText(this, "Property updated", Toast.LENGTH_SHORT).show();
+                                    setResult(RESULT_OK);
                                     finish();
                                 })
                                 .addOnFailureListener(e -> Toast.makeText(this, "Update failed", Toast.LENGTH_SHORT).show());

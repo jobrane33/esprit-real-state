@@ -43,6 +43,7 @@ public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.Proper
         return new PropertyViewHolder(view);
     }
     private ImageView propertyImageView;
+    // Item click listener interface
 
     @Override
     public void onBindViewHolder(@NonNull PropertyViewHolder holder, int position) {
@@ -122,4 +123,5 @@ public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.Proper
             btnDelete = itemView.findViewById(R.id.btnDelete);
         }
     }
+    
 }
