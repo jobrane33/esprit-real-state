@@ -1,6 +1,7 @@
 package com.example.realestateapp.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import com.bumptech.glide.Glide;
 import com.example.realestateapp.R;
 import com.example.realestateapp.model.FavProperty;
 import com.example.realestateapp.repository.FavoritesRepository; // NEW
+import com.example.realestateapp.screens.DetailsActivity;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
@@ -82,6 +84,31 @@ public class FavAdapter extends RecyclerView.Adapter<FavAdapter.ViewHolder> {
                 Toast.makeText(context, "Error: Item ID missing", Toast.LENGTH_SHORT).show();
             }
         });
+        // --- FEATURE 2: SHARE PROPERTY (New) ---
+        holder.share.setOnClickListener(v -> {
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("text/plain");
+            String shareBody = "Check out this amazing property: " + fav.getTitle() + "\nPrice: " + fav.getPrice() + "\nLocation: " + fav.getLocation();
+            shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Real Estate App Property");
+            shareIntent.putExtra(Intent.EXTRA_TEXT, shareBody);
+            context.startActivity(Intent.createChooser(shareIntent, "Share via"));
+        });
+
+        // --- FEATURE 3: CLICK ROW TO OPEN DETAILS (New) ---
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, DetailsActivity.class);
+            // Pass all data back to details so it populates correctly
+            intent.putExtra("title", fav.getTitle());
+            intent.putExtra("price", fav.getPrice());
+            intent.putExtra("location", fav.getLocation());
+            intent.putExtra("shortdescription", fav.getShortDescription());
+            intent.putExtra("imageuri", fav.getImageuri());
+            intent.putExtra("description", fav.getDescription());
+            intent.putExtra("contactno", fav.getContactno());
+            intent.putExtra("type", fav.getType());
+            intent.putExtra("ownername", fav.getOwnername());
+            context.startActivity(intent);
+        });
     }
 
     private void deleteFromFirestore(String documentId, int position) {
@@ -111,7 +138,7 @@ public class FavAdapter extends RecyclerView.Adapter<FavAdapter.ViewHolder> {
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView title, location, price;
-        ImageView image, delete;
+        ImageView image, delete, share;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -120,6 +147,8 @@ public class FavAdapter extends RecyclerView.Adapter<FavAdapter.ViewHolder> {
             price = itemView.findViewById(R.id.favorite_price);
             image = itemView.findViewById(R.id.favorite_image);
             delete = itemView.findViewById(R.id.favorite_delete);
+
+            share = itemView.findViewById(R.id.favorite_share);
         }
     }
 
