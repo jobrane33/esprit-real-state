@@ -21,6 +21,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.realestateapp.R;
+import com.example.realestateapp.adapters.HomeAdapter;
+import com.example.realestateapp.adapters.PropertyAdapter;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.ByteArrayOutputStream;

@@ -2,6 +2,9 @@ package com.example.realestateapp.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,61 +47,69 @@ public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.Proper
     public void onBindViewHolder(@NonNull PropertyViewHolder holder, int position) {
         Property property = propertyList.get(position);
 
-        // Safety checks
-        if (holder.txtTitle != null)
-            holder.txtTitle.setText(property.getTitle() != null ? property.getTitle() : "No Title");
+        holder.txtTitle.setText(property.getTitle() != null ? property.getTitle() : "No Title");
+        holder.txtPrice.setText(property.getPrice() != null ? "$" + property.getPrice() : "$0");
 
-        if (holder.txtPrice != null)
-            holder.txtPrice.setText(property.getPrice() != null ? "$" + property.getPrice() : "$0");
+        String base64 = property.getImageBase64();
 
-        if (holder.propertyImage != null) {
-            if (property.getImageUrl() != null && !property.getImageUrl().isEmpty()) {
-                Glide.with(context).load(property.getImageUrl()).into(holder.propertyImage);
-            } else if (property.getImageResId() != null) {
-                holder.propertyImage.setImageResource(property.getImageResId());
-            } else {
+        if (base64 != null && !base64.isEmpty()) {
+            base64 = base64.replaceAll("\\s+", ""); // remove newlines
+            if (base64.startsWith("data:image")) {
+                int commaIndex = base64.indexOf(',');
+                if (commaIndex != -1) {
+                    base64 = base64.substring(commaIndex + 1);
+                }
+            }
+            try {
+                byte[] decodedBytes = Base64.decode(base64, Base64.DEFAULT);
+                Glide.with(context)
+                        .asBitmap()
+                        .load(decodedBytes)
+                        .placeholder(R.drawable.hom1)
+                        .into(holder.propertyImage);
+            } catch (Exception e) {
                 holder.propertyImage.setImageResource(R.drawable.hom1);
             }
+        } else if (property.getImageResId() != null) {
+            holder.propertyImage.setImageResource(property.getImageResId());
+        } else {
+            holder.propertyImage.setImageResource(R.drawable.hom1);
         }
 
-        // Update button
-        if (holder.btnUpdate != null) {
-            holder.btnUpdate.setOnClickListener(v -> {
-                int pos = holder.getAdapterPosition();
-                if (pos != RecyclerView.NO_POSITION) {
-                    Intent intent = new Intent(context, UpdatePropertyActivity.class);
-                    intent.putExtra("propertyTitle", propertyList.get(pos).getTitle());
-                    context.startActivity(intent);
-                }
-            });
-        }
+        //Update button
+        holder.btnUpdate.setOnClickListener(v -> {
+            int pos = holder.getAdapterPosition();
+            if (pos != RecyclerView.NO_POSITION) {
+                Intent intent = new Intent(context, UpdatePropertyActivity.class);
+                intent.putExtra("propertyTitle", propertyList.get(pos).getTitle());
+                context.startActivity(intent);
+            }
+        });
 
         // Delete button
-        if (holder.btnDelete != null) {
-            holder.btnDelete.setOnClickListener(v -> {
-                int pos = holder.getAdapterPosition();
-                if (pos != RecyclerView.NO_POSITION) {
-                    String titleToDelete = propertyList.get(pos).getTitle();
-                    db.collection("Properties")
-                            .whereEqualTo("title", titleToDelete)
-                            .get()
-                            .addOnSuccessListener(query -> {
-                                if (!query.isEmpty()) {
-                                    String docId = query.getDocuments().get(0).getId();
-                                    db.collection("Properties").document(docId).delete()
-                                            .addOnSuccessListener(aVoid -> {
-                                                propertyList.remove(pos);
-                                                notifyItemRemoved(pos);
-                                                notifyItemRangeChanged(pos, propertyList.size());
-                                                Toast.makeText(context, "Property deleted", Toast.LENGTH_SHORT).show();
-                                            })
-                                            .addOnFailureListener(e -> Toast.makeText(context, "Delete failed", Toast.LENGTH_SHORT).show());
-                                }
-                            })
-                            .addOnFailureListener(e -> Toast.makeText(context, "Delete failed", Toast.LENGTH_SHORT).show());
-                }
-            });
-        }
+        holder.btnDelete.setOnClickListener(v -> {
+            int pos = holder.getAdapterPosition();
+            if (pos != RecyclerView.NO_POSITION) {
+                String titleToDelete = propertyList.get(pos).getTitle();
+                db.collection("Properties")
+                        .whereEqualTo("title", titleToDelete)
+                        .get()
+                        .addOnSuccessListener(query -> {
+                            if (!query.isEmpty()) {
+                                String docId = query.getDocuments().get(0).getId();
+                                db.collection("Properties").document(docId).delete()
+                                        .addOnSuccessListener(aVoid -> {
+                                            propertyList.remove(pos);
+                                            notifyItemRemoved(pos);
+                                            notifyItemRangeChanged(pos, propertyList.size());
+                                            Toast.makeText(context, "Property deleted", Toast.LENGTH_SHORT).show();
+                                        })
+                                        .addOnFailureListener(e -> Toast.makeText(context, "Delete failed", Toast.LENGTH_SHORT).show());
+                            }
+                        })
+                        .addOnFailureListener(e -> Toast.makeText(context, "Delete failed", Toast.LENGTH_SHORT).show());
+            }
+        });
     }
 
     @Override
