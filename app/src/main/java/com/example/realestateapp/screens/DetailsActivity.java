@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Button;
@@ -52,8 +54,7 @@ public class DetailsActivity extends AppCompatActivity {
             String type = intent.getStringExtra("type");
             String ownername = intent.getStringExtra("ownername");
 
-            String imageUrl = intent.getStringExtra("imageUrl");
-            int imageResId = intent.getIntExtra("imageResId", 0);
+            String imageUriString = intent.getStringExtra("imageUri");
 
             priceTextView.setText(price);
             shortDescriptionTextView.setText(shortdescription);
@@ -63,19 +64,15 @@ public class DetailsActivity extends AppCompatActivity {
             rentSellTextView.setText(type);
             locationTextView.setText(location);
 
-            // Load image: Firebase or local drawable
-            if (imageUrl != null && !imageUrl.isEmpty()) {
-                Glide.with(this)
-                        .load(imageUrl)
-                        .placeholder(R.drawable.hom1)
-                        .error(R.drawable.hom1)
-                        .centerCrop()
-                        .into(propertyImageView);
-            } else if (imageResId != 0) {
-                propertyImageView.setImageResource(imageResId);
+            String imageBase64 = intent.getStringExtra("imageBase64");
+            if (imageBase64 != null && !imageBase64.isEmpty()) {
+                byte[] bytes = android.util.Base64.decode(imageBase64, android.util.Base64.DEFAULT);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                propertyImageView.setImageBitmap(bitmap);
             } else {
                 propertyImageView.setImageResource(R.drawable.hom1);
             }
+
 
             callButton.setOnClickListener(v -> {
                 Intent dialIntent = new Intent(Intent.ACTION_DIAL);

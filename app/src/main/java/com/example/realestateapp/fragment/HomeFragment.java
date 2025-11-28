@@ -82,7 +82,6 @@ public class HomeFragment extends Fragment {
     private void setupRecyclerView() {
         homeAdapter = new HomeAdapter(getContext(), filteredProperties, position -> {
             Item clickedItem = homeAdapter.getItem(position);
-
             Intent intent = new Intent(getContext(), DetailsActivity.class);
             intent.putExtra("location", clickedItem.getLocation());
             intent.putExtra("price", clickedItem.getPrice());
@@ -91,13 +90,7 @@ public class HomeFragment extends Fragment {
             intent.putExtra("contactno", clickedItem.getOwnerContact());
             intent.putExtra("type", clickedItem.getType());
             intent.putExtra("ownername", clickedItem.getOwnerName());
-
-            if (clickedItem.getImageUrl() != null && !clickedItem.getImageUrl().isEmpty()) {
-                intent.putExtra("imageuri", clickedItem.getImageUrl());
-            } else {
-                intent.putExtra("imageResId", clickedItem.getImageResId());
-            }
-
+            intent.putExtra("imageBase64", clickedItem.getImageUrl()); // <-- Base64
             startActivity(intent);
         });
 
@@ -130,7 +123,7 @@ public class HomeFragment extends Fragment {
                             doc.getString("price"),
                             doc.getString("category"),
                             doc.getString("type"),
-                            doc.getString("imageUri"),
+                            doc.getString("imageBase64"),  // <-- now Base64
                             doc.getString("ownername"),
                             doc.getString("contactno"),
                             doc.getString("description"),

@@ -1,6 +1,9 @@
 package com.example.realestateapp.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +13,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.realestateapp.R;
 import com.example.realestateapp.model.Item;
 
@@ -46,15 +48,18 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder
         holder.priceText.setText(item.getPrice());
         holder.locationText.setText(item.getLocation());
 
-        // Load image: either drawable or Firebase URL
-        if (item.getImageUrl() != null && !item.getImageUrl().isEmpty()) {
-            Glide.with(context)
-                    .load(item.getImageUrl())
-                    .placeholder(R.drawable.hom1)
-                    .error(R.drawable.hom1)
-                    .centerCrop()
-                    .into(holder.imageView);
-        } else if (item.getImageResId() != null) {
+        // --- Load Base64 image ---
+        String imageBase64 = item.getImageUrl(); // Base64 string from Firebase
+        if (imageBase64 != null && !imageBase64.isEmpty()) {
+            try {
+                byte[] bytes = Base64.decode(imageBase64, Base64.DEFAULT);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                holder.imageView.setImageBitmap(bitmap);
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+                holder.imageView.setImageResource(R.drawable.hom1);
+            }
+        } else if (item.getImageResId() != null && item.getImageResId() != 0) {
             holder.imageView.setImageResource(item.getImageResId());
         } else {
             holder.imageView.setImageResource(R.drawable.hom1);
@@ -70,12 +75,10 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder
         return items.size();
     }
 
-    // Get item at position
     public Item getItem(int position) {
         return items.get(position);
     }
 
-    // Update list for filtering / loading
     public void updateList(List<Item> newItems) {
         this.items = newItems;
         notifyDataSetChanged();
@@ -91,7 +94,6 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder
             titleText = itemView.findViewById(R.id.property_title);
             priceText = itemView.findViewById(R.id.property_price);
             locationText = itemView.findViewById(R.id.property_location);
-
         }
     }
 }
