@@ -6,84 +6,118 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.realestateapp.R;
 import com.example.realestateapp.model.Property;
-import com.example.realestateapp.screens.AddPropertyActivity;
 import com.example.realestateapp.screens.UpdatePropertyActivity;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.ArrayList;
+import java.util.List;
 
-public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.ViewHolder> {
+public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.PropertyViewHolder> {
 
-    Context context;
-    ArrayList<Property> list;
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final Context context;
+    private final List<Property> propertyList;
+    private final FirebaseFirestore db;
 
-    public PropertyAdapter(Context context, ArrayList<Property> list) {
+    public PropertyAdapter(Context context, List<Property> propertyList) {
         this.context = context;
-        this.list = list;
+        this.propertyList = propertyList;
+        this.db = FirebaseFirestore.getInstance();
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public PropertyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.property_item, parent, false);
-        return new ViewHolder(view);
+        return new PropertyViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Property p = list.get(position);
-        holder.title.setText(p.getTitle());
+    public void onBindViewHolder(@NonNull PropertyViewHolder holder, int position) {
+        Property property = propertyList.get(position);
 
-        // DELETE using title (because there is no id)
-        holder.btnDelete.setOnClickListener(v -> {
-            db.collection("Properties").whereEqualTo("title", p.getTitle())
-                    .get()
-                    .addOnSuccessListener(querySnapshot -> {
-                        for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                            doc.getReference().delete();
-                        }
-                        Toast.makeText(context, "Property deleted", Toast.LENGTH_SHORT).show();
-                        ((AppCompatActivity)context).finish(); // go back to Home
-                    })
-                    .addOnFailureListener(e ->
-                            Toast.makeText(context, "Delete failed", Toast.LENGTH_SHORT).show()
-                    );
-        });
+        // Safety checks
+        if (holder.txtTitle != null)
+            holder.txtTitle.setText(property.getTitle() != null ? property.getTitle() : "No Title");
 
-        // UPDATE using title as identifier
-        holder.btnUpdate.setOnClickListener(v -> {
-            Intent i = new Intent(context, UpdatePropertyActivity.class);
-            i.putExtra("propertyTitle", p.getTitle()); // send title for prefill
-            context.startActivity(i);
-        });
+        if (holder.txtPrice != null)
+            holder.txtPrice.setText(property.getPrice() != null ? "$" + property.getPrice() : "$0");
 
+        if (holder.propertyImage != null) {
+            if (property.getImageUrl() != null && !property.getImageUrl().isEmpty()) {
+                Glide.with(context).load(property.getImageUrl()).into(holder.propertyImage);
+            } else if (property.getImageResId() != null) {
+                holder.propertyImage.setImageResource(property.getImageResId());
+            } else {
+                holder.propertyImage.setImageResource(R.drawable.hom1);
+            }
+        }
+
+        // Update button
+        if (holder.btnUpdate != null) {
+            holder.btnUpdate.setOnClickListener(v -> {
+                int pos = holder.getAdapterPosition();
+                if (pos != RecyclerView.NO_POSITION) {
+                    Intent intent = new Intent(context, UpdatePropertyActivity.class);
+                    intent.putExtra("propertyTitle", propertyList.get(pos).getTitle());
+                    context.startActivity(intent);
+                }
+            });
+        }
+
+        // Delete button
+        if (holder.btnDelete != null) {
+            holder.btnDelete.setOnClickListener(v -> {
+                int pos = holder.getAdapterPosition();
+                if (pos != RecyclerView.NO_POSITION) {
+                    String titleToDelete = propertyList.get(pos).getTitle();
+                    db.collection("Properties")
+                            .whereEqualTo("title", titleToDelete)
+                            .get()
+                            .addOnSuccessListener(query -> {
+                                if (!query.isEmpty()) {
+                                    String docId = query.getDocuments().get(0).getId();
+                                    db.collection("Properties").document(docId).delete()
+                                            .addOnSuccessListener(aVoid -> {
+                                                propertyList.remove(pos);
+                                                notifyItemRemoved(pos);
+                                                notifyItemRangeChanged(pos, propertyList.size());
+                                                Toast.makeText(context, "Property deleted", Toast.LENGTH_SHORT).show();
+                                            })
+                                            .addOnFailureListener(e -> Toast.makeText(context, "Delete failed", Toast.LENGTH_SHORT).show());
+                                }
+                            })
+                            .addOnFailureListener(e -> Toast.makeText(context, "Delete failed", Toast.LENGTH_SHORT).show());
+                }
+            });
+        }
     }
 
     @Override
     public int getItemCount() {
-        return list.size();
+        return propertyList != null ? propertyList.size() : 0;
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView title;
-        Button btnDelete, btnUpdate;
+    static class PropertyViewHolder extends RecyclerView.ViewHolder {
+        ImageView propertyImage;
+        TextView txtTitle, txtPrice;
+        Button btnUpdate, btnDelete;
 
-        public ViewHolder(@NonNull View itemView) {
+        public PropertyViewHolder(@NonNull View itemView) {
             super(itemView);
-            title = itemView.findViewById(R.id.txtTitle);
-            btnDelete = itemView.findViewById(R.id.btnDelete);
+            propertyImage = itemView.findViewById(R.id.property_image);
+            txtTitle = itemView.findViewById(R.id.property_title);
+            txtPrice = itemView.findViewById(R.id.property_price);
             btnUpdate = itemView.findViewById(R.id.btnUpdate);
+            btnDelete = itemView.findViewById(R.id.btnDelete);
         }
     }
 }

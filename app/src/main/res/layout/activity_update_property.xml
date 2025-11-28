@@ -29,19 +29,34 @@
             android:hint="Price"
             android:layout_marginTop="8dp" />
 
-        <EditText
-            android:id="@+id/editTextType"
+        <!-- Spinner for Category -->
+        <Spinner
+            android:id="@+id/spinnerCategory"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Type"
             android:layout_marginTop="8dp" />
 
-        <EditText
-            android:id="@+id/editTextCategory"
+        <!-- RadioGroup for Type -->
+        <RadioGroup
+            android:id="@+id/radioGroupType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Category"
-            android:layout_marginTop="8dp" />
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <RadioButton
+                android:id="@+id/radioSell"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sell" />
+
+            <RadioButton
+                android:id="@+id/radioRent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Rent"
+                android:layout_marginStart="16dp"/>
+        </RadioGroup>
 
         <EditText
             android:id="@+id/editTextDescription"
@@ -49,6 +64,15 @@
             android:layout_height="wrap_content"
             android:hint="Description"
             android:layout_marginTop="8dp" />
+
+        <!-- ImageView for property image -->
+        <ImageView
+            android:id="@+id/imageViewUpdated"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="8dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/hom1"/>
 
         <Button
             android:id="@+id/buttonUpdateProperty"
@@ -58,7 +82,5 @@
             android:layout_marginTop="16dp"
             android:backgroundTint="@color/black"
             android:textColor="@android:color/white" />
-
     </LinearLayout>
-
 </ScrollView>

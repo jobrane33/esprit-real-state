@@ -1,94 +1,111 @@
 package com.example.realestateapp.screens;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.example.realestateapp.R;
 import com.example.realestateapp.model.Property;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class UpdatePropertyActivity extends AppCompatActivity {
 
     private EditText editTextTitle, editTextLocation, editTextPrice,
-            editTextType, editTextCategory, editTextDescription;
-    private Button buttonUpdateProperty;
+            editTextDescription;
+    private Spinner spinnerCategory;
+    private RadioGroup radioGroupType;
+    private ImageView imageView;
+    private Button buttonUpdate;
 
     private FirebaseFirestore db;
-    private DocumentReference currentDocRef;
+    private Property currentProperty;
 
+    @SuppressLint("MissingInflatedId")
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_property);
-
-        db = FirebaseFirestore.getInstance();
 
         editTextTitle = findViewById(R.id.editTextTitle);
         editTextLocation = findViewById(R.id.editTextLocation);
         editTextPrice = findViewById(R.id.editTextPrice);
-        editTextType = findViewById(R.id.editTextType);
-        editTextCategory = findViewById(R.id.editTextCategory);
         editTextDescription = findViewById(R.id.editTextDescription);
-        buttonUpdateProperty = findViewById(R.id.buttonUpdateProperty);
+        spinnerCategory = findViewById(R.id.spinnerCategory);
+        radioGroupType = findViewById(R.id.radioGroupType);
+        imageView = findViewById(R.id.imageViewUpdated);
 
-        // Get property title from intent
+        buttonUpdate = findViewById(R.id.buttonUpdateProperty);
+
+        db = FirebaseFirestore.getInstance();
+
         String propertyTitle = getIntent().getStringExtra("propertyTitle");
-        if (propertyTitle != null) {
-            prefillProperty(propertyTitle);
-        }
+        if (propertyTitle != null) prefillProperty(propertyTitle);
 
-        buttonUpdateProperty.setOnClickListener(v -> updateProperty());
+        buttonUpdate.setOnClickListener(v -> updateProperty());
     }
 
     private void prefillProperty(String title) {
-        db.collection("Properties")
-                .whereEqualTo("title", title)
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
+        db.collection("Properties").whereEqualTo("title", title)
+                .get().addOnSuccessListener(querySnapshot -> {
                     if (!querySnapshot.isEmpty()) {
                         QueryDocumentSnapshot doc = (QueryDocumentSnapshot) querySnapshot.getDocuments().get(0);
-                        currentDocRef = doc.getReference();
+                        currentProperty = doc.toObject(Property.class);
+                        currentProperty.setTitle(doc.getString("title")); // keep title as ID key
 
-                        editTextTitle.setText(doc.getString("title"));
-                        editTextLocation.setText(doc.getString("location"));
-                        editTextPrice.setText(doc.getString("price"));
-                        editTextType.setText(doc.getString("type"));
-                        editTextCategory.setText(doc.getString("category"));
-                        editTextDescription.setText(doc.getString("description"));
+                        editTextTitle.setText(currentProperty.getTitle());
+                        editTextLocation.setText(currentProperty.getLocation());
+                        editTextPrice.setText(currentProperty.getPrice());
+                        editTextDescription.setText(currentProperty.getCategory()); // example, map properly
+
+                        if (currentProperty.getImageUrl() != null && !currentProperty.getImageUrl().isEmpty()) {
+                            Glide.with(this).load(currentProperty.getImageUrl()).into(imageView);
+                        } else if (currentProperty.getImageResId() != null) {
+                            imageView.setImageResource(currentProperty.getImageResId());
+                        }
+
                     } else {
                         Toast.makeText(this, "Property not found", Toast.LENGTH_SHORT).show();
                         finish();
                     }
-                })
-                .addOnFailureListener(e -> Toast.makeText(this, "Error loading property", Toast.LENGTH_SHORT).show());
+                });
     }
 
     private void updateProperty() {
-        if (currentDocRef == null) return;
+        if (currentProperty == null) return;
 
-        Map<String, Object> updatedData = new HashMap<>();
-        updatedData.put("title", editTextTitle.getText().toString());
-        updatedData.put("location", editTextLocation.getText().toString());
-        updatedData.put("price", editTextPrice.getText().toString());
-        updatedData.put("type", editTextType.getText().toString());
-        updatedData.put("category", editTextCategory.getText().toString());
-        updatedData.put("description", editTextDescription.getText().toString());
+        currentProperty.setTitle(editTextTitle.getText().toString());
+        currentProperty.setLocation(editTextLocation.getText().toString());
+        currentProperty.setPrice(editTextPrice.getText().toString());
+        currentProperty.setCategory(editTextDescription.getText().toString()); // example
 
-        currentDocRef.set(updatedData)
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "Property updated!", Toast.LENGTH_SHORT).show();
-                    finish(); // go back to previous screen
+        db.collection("Properties")
+                .whereEqualTo("title", currentProperty.getTitle())
+                .get()
+                .addOnSuccessListener(query -> {
+                    if (!query.isEmpty()) {
+                        String docId = query.getDocuments().get(0).getId();
+                        db.collection("Properties").document(docId).set(currentProperty)
+                                .addOnSuccessListener(aVoid -> {
+                                    Toast.makeText(this, "Property updated", Toast.LENGTH_SHORT).show();
+                                    finish();
+                                })
+                                .addOnFailureListener(e -> Toast.makeText(this, "Update failed", Toast.LENGTH_SHORT).show());
+                    }
                 })
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, "Update failed", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> Toast.makeText(this, "Update failed", Toast.LENGTH_SHORT).show());
     }
 }
