@@ -1,15 +1,20 @@
 package com.example.realestateapp.screens;
 
+import android.content.Intent;
 import android.os.Bundle;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import android.widget.Toast;
+
 import com.example.realestateapp.R;
 import com.example.realestateapp.adapters.PropertyAdapter;
 import com.example.realestateapp.model.Property;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import android.widget.Toast;
+
 import java.util.ArrayList;
 
 public class ListPropertiesActivity extends AppCompatActivity {
@@ -19,10 +24,20 @@ public class ListPropertiesActivity extends AppCompatActivity {
     private ArrayList<Property> propertyList;
     private FirebaseFirestore db;
 
+    // Activity Result Launcher to handle update results
+    private final ActivityResultLauncher<Intent> updatePropertyLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    // Reload the list when returning from update
+                    loadProperties();
+                }
+            });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_properties);
+
         recyclerView = findViewById(R.id.recyclerViewProperties);
         propertyList = new ArrayList<>();
         adapter = new PropertyAdapter(this, propertyList);
@@ -30,13 +45,14 @@ public class ListPropertiesActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
-        recyclerView = findViewById(R.id.recyclerViewProperties);
         db = FirebaseFirestore.getInstance();
-        propertyList = new ArrayList<>();
-        adapter = new PropertyAdapter(this, propertyList);
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(adapter);
+        // Set update click listener
+        adapter.setOnUpdateClickListener(property -> {
+            Intent intent = new Intent(this, UpdatePropertyActivity.class);
+            intent.putExtra("propertyTitle", property.getTitle());
+            updatePropertyLauncher.launch(intent);
+        });
 
         loadProperties();
     }
@@ -52,7 +68,7 @@ public class ListPropertiesActivity extends AppCompatActivity {
                             String type = doc.getString("type");
                             String price = doc.getString("price");
                             String location = doc.getString("location");
-                            String imageBase64 = doc.getString("imageBase64"); // <-- correct field
+                            String imageBase64 = doc.getString("imageBase64");
 
                             propertyList.add(new Property(title, location, price, category, imageBase64));
                         }

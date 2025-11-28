@@ -16,10 +16,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.realestateapp.R;
 import com.example.realestateapp.model.Property;
-import com.example.realestateapp.screens.UpdatePropertyActivity;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
@@ -29,6 +27,17 @@ public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.Proper
     private final Context context;
     private final List<Property> propertyList;
     private final FirebaseFirestore db;
+
+    // Interface for update click
+    public interface OnUpdateClickListener {
+        void onUpdateClick(Property property);
+    }
+
+    private OnUpdateClickListener updateClickListener;
+
+    public void setOnUpdateClickListener(OnUpdateClickListener listener) {
+        this.updateClickListener = listener;
+    }
 
     public PropertyAdapter(Context context, List<Property> propertyList) {
         this.context = context;
@@ -42,8 +51,6 @@ public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.Proper
         View view = LayoutInflater.from(context).inflate(R.layout.property_item, parent, false);
         return new PropertyViewHolder(view);
     }
-    private ImageView propertyImageView;
-    // Item click listener interface
 
     @Override
     public void onBindViewHolder(@NonNull PropertyViewHolder holder, int position) {
@@ -69,16 +76,14 @@ public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.Proper
             holder.propertyImage.setImageResource(R.drawable.hom1);
         }
 
-        // Update & Delete button listeners (unchanged)
+        // Update button click
         holder.btnUpdate.setOnClickListener(v -> {
-            int pos = holder.getAdapterPosition();
-            if (pos != RecyclerView.NO_POSITION) {
-                Intent intent = new Intent(context, UpdatePropertyActivity.class);
-                intent.putExtra("propertyTitle", propertyList.get(pos).getTitle());
-                context.startActivity(intent);
+            if (updateClickListener != null) {
+                updateClickListener.onUpdateClick(property);
             }
         });
 
+        // Delete button click
         holder.btnDelete.setOnClickListener(v -> {
             int pos = holder.getAdapterPosition();
             if (pos != RecyclerView.NO_POSITION) {
@@ -123,5 +128,4 @@ public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.Proper
             btnDelete = itemView.findViewById(R.id.btnDelete);
         }
     }
-    
 }
