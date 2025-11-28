@@ -202,6 +202,9 @@ public class DetailsActivity extends AppCompatActivity {
 
     private FirebaseFirestore db;
 
+    // Wishlist
+    private boolean isFavorite = false;
+
     @SuppressLint({"MissingInflatedId", "WrongViewCast"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -245,6 +248,7 @@ public class DetailsActivity extends AppCompatActivity {
         // Retrieve passed data from the intent
         Intent intent = getIntent();
         if (intent != null) {
+            String title = intent.getStringExtra("title");
             String location = intent.getStringExtra("location");
             String price = intent.getStringExtra("price");
             String shortdescription = intent.getStringExtra("shortdescription");
@@ -285,14 +289,21 @@ public class DetailsActivity extends AppCompatActivity {
                 finish();
             });
 
-            // Set onClickListener for favButton
+            // Wishlist
+            checkInitialFavoriteStatus(contactno);
+
+            // Wishlist
             favButton.setOnClickListener(v -> {
-                // Add the property to favorites
-                addToFavorites(location, price, shortdescription, imageuri, description, contactno, type, ownername);
+                if (isFavorite) {
+                    removeFromFavorites(contactno);
+                } else {
+                    addToFavorites(title, location, price, shortdescription, imageuri, description, contactno, type, ownername);
+                }
             });
+
         } else {
             Toast.makeText(this, "Failed to retrieve property details", Toast.LENGTH_SHORT).show();
-            finish(); // Close the activity if no data is passed
+            finish();
         }
     }
 
@@ -305,57 +316,64 @@ public class DetailsActivity extends AppCompatActivity {
         startActivity(intent.createChooser(intent, "Choose email Client"));
     }
 
-
-    private void addToFavorites(String location, String price, String shortdescription, String imageuri, String description, String contactno, String type, String ownername) {
-        // Generate a unique document ID based on property details
-
-        db.collection("Favorites")
-                .whereEqualTo("location", location)
-                .whereEqualTo("price", price)
-                .whereEqualTo("shortdescription", shortdescription)
-                .whereEqualTo("imageuri", imageuri)
-                .whereEqualTo("description", description)
-                .whereEqualTo("contactno", contactno)
-                .whereEqualTo("type", type)
-                .whereEqualTo("ownername", ownername)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        // If property doesn't exist in favorites, add it
-                        if (task.getResult().isEmpty()) {
-
-                            String documentId = contactno;
-                            // Create a HashMap to store property data
-                            Map<String, Object> propertyData = new HashMap<>();
-                            propertyData.put("location", location);
-                            propertyData.put("price", price);
-                            propertyData.put("shortdescription", shortdescription);
-                            propertyData.put("imageuri", imageuri);
-                            propertyData.put("description", description);
-                            propertyData.put("contactno", contactno);
-                            propertyData.put("type", type);
-                            propertyData.put("ownername", ownername);
-
-                            // Add the property data to the "Favorites" collection with the custom document ID
-                            db.collection("Favorites")
-                                    .document(documentId)
-                                    .set(propertyData)
-                                    .addOnSuccessListener(aVoid -> {
-                                        Toast.makeText(this, "Added to favorites", Toast.LENGTH_SHORT).show();
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        Toast.makeText(this, "Failed to add to favorites", Toast.LENGTH_SHORT).show();
-                                    });
-                        } else {
-                            // Property already exists in favorites
-                            Toast.makeText(this, "Property already added to favorites", Toast.LENGTH_SHORT).show();
-                        }
+    // Wishlist
+    private void checkInitialFavoriteStatus(String contactno) {
+        if (contactno == null) {
+            return;
+        }
+        // We use contactno as ID based on your previous code structure
+        db.collection("Favorites").document(contactno).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        isFavorite = true;
+                        favButton.setImageResource(R.drawable.baseline_favorite_24); // Filled Heart
                     } else {
-                        // Error getting favorites data
-                        Toast.makeText(this, "Error checking favorites", Toast.LENGTH_SHORT).show();
+                        isFavorite = false;
+                        favButton.setImageResource(R.drawable.baseline_favorite_border_24); // Empty Heart
                     }
                 });
+    }
 
+    // Wishlist
+    private void addToFavorites(String title, String location, String price, String shortdescription, String imageuri, String description, String contactno, String type, String ownername) {
+        String documentId = contactno; // Using contactno as ID per your existing logic
+
+        Map<String, Object> propertyData = new HashMap<>();
+        propertyData.put("title", title);
+        propertyData.put("location", location);
+        propertyData.put("price", price);
+        propertyData.put("shortdescription", shortdescription);
+        propertyData.put("imageuri", imageuri);
+        propertyData.put("description", description);
+        propertyData.put("contactno", contactno);
+        propertyData.put("type", type);
+        propertyData.put("ownername", ownername);
+
+        db.collection("Favorites")
+                .document(documentId)
+                .set(propertyData)
+                .addOnSuccessListener(aVoid -> {
+                    isFavorite = true; // Update state
+                    favButton.setImageResource(R.drawable.baseline_favorite_24); // Set Filled Heart
+                    Toast.makeText(this, "Added to favorites", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to add to favorites", Toast.LENGTH_SHORT).show();
+                    Log.e("FirestoreError", "Error adding to favorites", e);
+                });
+    }
+    // Wishlist
+    private void removeFromFavorites(String contactno) {
+        db.collection("Favorites").document(contactno)
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    isFavorite = false; // Update state
+                    favButton.setImageResource(R.drawable.baseline_favorite_border_24); // Set Empty Heart
+                    Toast.makeText(this, "Removed from favorites", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to remove", Toast.LENGTH_SHORT).show();
+                });
     }
 
     private String generateDocumentId(String location, String price, String shortdescription, String imageuri, String description, String contactno, String type, String ownername) {

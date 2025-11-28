@@ -124,6 +124,7 @@ public class HomeFragment extends Fragment {
 
             // Open DetailsActivity and pass data
             Intent intent = new Intent(getContext(), DetailsActivity.class);
+            intent.putExtra("title", clickedItem.getTitle());
             intent.putExtra("location", clickedItem.getLocation());
             intent.putExtra("price", clickedItem.getPrice());
             intent.putExtra("shortdescription", clickedItem.getShortDescription());

@@ -54,13 +54,6 @@
         android:layout_height="match_parent">
 
         <ImageView
-            android:id="@+id/favorite_heart"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/like"
-            android:contentDescription="Toggle Favorite"/>
-
-        <ImageView
             android:id="@+id/favorite_delete"
             android:layout_width="24dp"
             android:layout_height="24dp"

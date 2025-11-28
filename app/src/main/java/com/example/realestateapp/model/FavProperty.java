@@ -3,7 +3,7 @@ package com.example.realestateapp.model;
 public class FavProperty {
     private String id;
     private String title;
-    private String imageUrl;
+    private String imageuri;
     private String location;
     private String type;
     private String price;
@@ -17,10 +17,10 @@ public class FavProperty {
         // Empty constructor needed for Firestore
     }
 
-    public FavProperty(String id, String title, String imageUrl, String location, String type, String price, String shortdescription, String ownername, String description, String contactno ) {
+    public FavProperty(String id, String title, String imageuri, String location, String type, String price, String shortdescription, String ownername, String description, String contactno ) {
         this.id = id;
         this.title = title;
-        this.imageUrl = imageUrl;
+        this.imageuri = imageuri;
         this.location = location;
         this.type = type;
         this.price = price;
@@ -35,8 +35,8 @@ public class FavProperty {
     public String getId() { return id;}
 
     public String getTitle() { return title;}
-    public String getFavImageUrl() {
-        return imageUrl;
+    public String getImageuri() {
+        return imageuri;
     }
 
     public String getLocation() {
@@ -70,6 +70,8 @@ public class FavProperty {
 
 
     public void setId(String id) {this.id = id;}
+
+    public void setImageuri(String imageuri) { this.imageuri = imageuri;}
     public void setLiked(boolean liked) {this.liked = liked;}
 }
 
