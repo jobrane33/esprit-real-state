@@ -50,6 +50,7 @@ public class AddPropertyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_property_listing);
 
+        // Initialize views
         locationEditText = findViewById(R.id.property_location);
         descriptionEditText = findViewById(R.id.property_description);
         shortDescriptionEditText = findViewById(R.id.property_shortdescription);
@@ -67,7 +68,7 @@ public class AddPropertyActivity extends AppCompatActivity {
 
         back_button.setOnClickListener(v -> finish());
 
-        // Spinner
+        // Spinner setup
         String[] categories = {"Apartment", "Villa", "Office", "Shop"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, categories);
@@ -81,6 +82,7 @@ public class AddPropertyActivity extends AppCompatActivity {
             startActivityForResult(intent, PICK_IMAGE_REQUEST);
         });
 
+        // Submit
         buttonSubmit.setOnClickListener(v -> submitProperty());
     }
 
@@ -115,6 +117,19 @@ public class AddPropertyActivity extends AppCompatActivity {
         String ownerName = ownerNameEditText.getText().toString().trim();
         String contactNo = contactNoEditText.getText().toString().trim();
         String price = priceEditText.getText().toString().trim();
+
+        // Validation
+        if (location.isEmpty()) { showError(locationEditText, "Location is required"); return; }
+        if (description.isEmpty()) { showError(descriptionEditText, "Description is required"); return; }
+        if (shortDescription.isEmpty()) { showError(shortDescriptionEditText, "Title is required"); return; }
+        if (ownerName.isEmpty()) { showError(ownerNameEditText, "Owner name is required"); return; }
+        if (contactNo.isEmpty()) { showError(contactNoEditText, "Contact number is required"); return; }
+        if (!contactNo.matches("\\+?\\d{7,15}")) {
+            showError(contactNoEditText, "Enter a valid contact number");
+            return;
+        }
+        if (price.isEmpty()) { showError(priceEditText, "Price is required"); return; }
+        if (!price.matches("\\d+")) { showError(priceEditText, "Price must be numeric"); return; }
 
         int selectedTypeId = radioGroupType.getCheckedRadioButtonId();
         if (selectedTypeId == -1) {
@@ -151,5 +166,10 @@ public class AddPropertyActivity extends AppCompatActivity {
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Failed to add property", Toast.LENGTH_SHORT).show()
                 );
+    }
+
+    private void showError(EditText editText, String message) {
+        editText.setError(message);
+        editText.requestFocus();
     }
 }
