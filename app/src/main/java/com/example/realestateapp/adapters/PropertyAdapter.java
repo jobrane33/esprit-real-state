@@ -42,6 +42,7 @@ public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.Proper
         View view = LayoutInflater.from(context).inflate(R.layout.property_item, parent, false);
         return new PropertyViewHolder(view);
     }
+    private ImageView propertyImageView;
 
     @Override
     public void onBindViewHolder(@NonNull PropertyViewHolder holder, int position) {
@@ -50,31 +51,19 @@ public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.Proper
         holder.txtTitle.setText(property.getTitle() != null ? property.getTitle() : "No Title");
         holder.txtPrice.setText(property.getPrice() != null ? "$" + property.getPrice() : "$0");
 
-        String base64 = property.getImageBase64();
-
-        if (base64 != null && !base64.isEmpty()) {
-            base64 = base64.replaceAll("\\s+", ""); // remove newlines
-            if (base64.startsWith("data:image")) {
-                int commaIndex = base64.indexOf(',');
-                if (commaIndex != -1) {
-                    base64 = base64.substring(commaIndex + 1);
-                }
-            }
+        String imageBase64 = property.getImageBase64();
+        if (imageBase64 != null && !imageBase64.isEmpty()) {
             try {
-                byte[] decodedBytes = Base64.decode(base64, Base64.DEFAULT);
-                Glide.with(context)
-                        .asBitmap()
-                        .load(decodedBytes)
-                        .placeholder(R.drawable.hom1)
-                        .into(holder.propertyImage);
+                byte[] bytes = android.util.Base64.decode(imageBase64, android.util.Base64.DEFAULT);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                propertyImageView.setImageBitmap(bitmap);
             } catch (Exception e) {
-                holder.propertyImage.setImageResource(R.drawable.hom1);
+                propertyImageView.setImageResource(R.drawable.hom1);
             }
-        } else if (property.getImageResId() != null) {
-            holder.propertyImage.setImageResource(property.getImageResId());
         } else {
-            holder.propertyImage.setImageResource(R.drawable.hom1);
+            propertyImageView.setImageResource(R.drawable.hom1);
         }
+
 
         //Update button
         holder.btnUpdate.setOnClickListener(v -> {
