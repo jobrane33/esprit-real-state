@@ -54,23 +54,27 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/favorite_share"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/baseline_share_24"
-            android:layout_marginEnd="16dp"
-            android:contentDescription="Share Property"
-            app:tint="#4CAF50" />
         <!-- Use a green color or your theme color. Make sure it is positioned correctly relative to the delete button -->
 
 
         <ImageView
+            android:id="@+id/favorite_share"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="8dp"
+            android:src="@drawable/baseline_share_24"
+            app:tint="?attr/colorPrimary"
+            android:contentDescription="Share" />
+
+        <!-- Delete Button -->
+        <ImageView
             android:id="@+id/favorite_delete"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="8dp"
             android:src="@drawable/baseline_delete_24"
-            android:contentDescription="Delete Favorite"
-            android:layout_marginTop="8dp"/>
+            app:tint="#F44336"
+            android:contentDescription="Delete" />
+
     </LinearLayout>
 </LinearLayout>
