@@ -51,21 +51,24 @@ public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.Proper
         holder.txtTitle.setText(property.getTitle() != null ? property.getTitle() : "No Title");
         holder.txtPrice.setText(property.getPrice() != null ? "$" + property.getPrice() : "$0");
 
+        // Load Base64 image
         String imageBase64 = property.getImageBase64();
         if (imageBase64 != null && !imageBase64.isEmpty()) {
             try {
-                byte[] bytes = android.util.Base64.decode(imageBase64, android.util.Base64.DEFAULT);
+                byte[] bytes = Base64.decode(imageBase64, Base64.DEFAULT);
                 Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                propertyImageView.setImageBitmap(bitmap);
+                holder.propertyImage.setImageBitmap(bitmap);
             } catch (Exception e) {
-                propertyImageView.setImageResource(R.drawable.hom1);
+                e.printStackTrace();
+                holder.propertyImage.setImageResource(R.drawable.hom1);
             }
+        } else if (property.getImageResId() != null) {
+            holder.propertyImage.setImageResource(property.getImageResId());
         } else {
-            propertyImageView.setImageResource(R.drawable.hom1);
+            holder.propertyImage.setImageResource(R.drawable.hom1);
         }
 
-
-        //Update button
+        // Update & Delete button listeners (unchanged)
         holder.btnUpdate.setOnClickListener(v -> {
             int pos = holder.getAdapterPosition();
             if (pos != RecyclerView.NO_POSITION) {
@@ -75,7 +78,6 @@ public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.Proper
             }
         });
 
-        // Delete button
         holder.btnDelete.setOnClickListener(v -> {
             int pos = holder.getAdapterPosition();
             if (pos != RecyclerView.NO_POSITION) {

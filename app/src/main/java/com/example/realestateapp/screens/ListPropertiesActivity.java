@@ -52,9 +52,9 @@ public class ListPropertiesActivity extends AppCompatActivity {
                             String type = doc.getString("type");
                             String price = doc.getString("price");
                             String location = doc.getString("location");
-                            String imageUrl = doc.getString("imageUri");
+                            String imageBase64 = doc.getString("imageBase64"); // <-- correct field
 
-                            propertyList.add(new Property(title, category, type, price, location, imageUrl));
+                            propertyList.add(new Property(title, location, price, category, imageBase64));
                         }
                         adapter.notifyDataSetChanged();
                     } else {
