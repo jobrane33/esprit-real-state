@@ -1,16 +1,24 @@
 package com.example.realestateapp.screens;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Base64;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
-import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -20,6 +28,8 @@ import com.example.realestateapp.model.Property;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.Objects;
 
 public class UpdatePropertyActivity extends AppCompatActivity {
@@ -32,6 +42,8 @@ public class UpdatePropertyActivity extends AppCompatActivity {
 
     private FirebaseFirestore db;
     private Property currentProperty;
+
+    private ActivityResultLauncher<Intent> imagePickerLauncher;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -56,6 +68,40 @@ public class UpdatePropertyActivity extends AppCompatActivity {
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerCategory.setAdapter(categoryAdapter);
 
+        // Image picker setup
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        Uri imageUri = result.getData().getData();
+                        try {
+                            InputStream inputStream = getContentResolver().openInputStream(imageUri);
+                            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                            imageView.setImageBitmap(bitmap);
+
+                            // Convert to Base64 and save in currentProperty
+                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos);
+                            byte[] imageBytes = baos.toByteArray();
+                            String encodedImage = Base64.encodeToString(imageBytes, Base64.DEFAULT);
+                            if (currentProperty != null) {
+                                currentProperty.setImageBase64(encodedImage);
+                                currentProperty.setImageUrl(null); // clear URL if new image
+                            }
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+        );
+
+        imageView.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            imagePickerLauncher.launch(intent);
+        });
+
         String propertyTitle = getIntent().getStringExtra("propertyTitle");
         if (propertyTitle != null) prefillProperty(propertyTitle);
 
@@ -68,22 +114,21 @@ public class UpdatePropertyActivity extends AppCompatActivity {
                     if (!querySnapshot.isEmpty()) {
                         QueryDocumentSnapshot doc = (QueryDocumentSnapshot) querySnapshot.getDocuments().get(0);
                         currentProperty = doc.toObject(Property.class);
-                        currentProperty.setTitle(doc.getString("title")); // keep title as ID key
+                        currentProperty.setTitle(doc.getString("title"));
 
-                        // Prefill fields
                         editTextTitle.setText(currentProperty.getTitle());
                         editTextLocation.setText(currentProperty.getLocation());
                         editTextPrice.setText(currentProperty.getPrice());
-                        editTextDescription.setText(currentProperty.getCategory());
+                        editTextDescription.setText(currentProperty.getShortdescription());
 
-                        // Set spinner selection for category
+                        // Spinner selection
                         if (currentProperty.getCategory() != null) {
                             ArrayAdapter adapter = (ArrayAdapter) spinnerCategory.getAdapter();
                             int spinnerPosition = adapter.getPosition(currentProperty.getCategory());
                             spinnerCategory.setSelection(spinnerPosition);
                         }
 
-                        // Set radio button selection for type
+                        // Radio button selection
                         if (currentProperty.getType() != null) {
                             if (currentProperty.getType().equalsIgnoreCase("Sell")) {
                                 radioGroupType.check(R.id.radioSell);
@@ -96,13 +141,9 @@ public class UpdatePropertyActivity extends AppCompatActivity {
                         if (currentProperty.getImageUrl() != null && !currentProperty.getImageUrl().isEmpty()) {
                             Glide.with(this).load(currentProperty.getImageUrl()).into(imageView);
                         } else if (currentProperty.getImageBase64() != null && !currentProperty.getImageBase64().isEmpty()) {
-                            try {
-                                byte[] bytes = android.util.Base64.decode(currentProperty.getImageBase64(), android.util.Base64.DEFAULT);
-                                imageView.setImageBitmap(android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                imageView.setImageResource(R.drawable.hom1);
-                            }
+                            byte[] bytes = Base64.decode(currentProperty.getImageBase64(), Base64.DEFAULT);
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                            imageView.setImageBitmap(bitmap);
                         } else if (currentProperty.getImageResId() != null) {
                             imageView.setImageResource(currentProperty.getImageResId());
                         }
@@ -120,9 +161,9 @@ public class UpdatePropertyActivity extends AppCompatActivity {
         currentProperty.setTitle(editTextTitle.getText().toString());
         currentProperty.setLocation(editTextLocation.getText().toString());
         currentProperty.setPrice(editTextPrice.getText().toString());
+        currentProperty.setShortdescription(editTextDescription.getText().toString());
         currentProperty.setCategory(Objects.requireNonNull(spinnerCategory.getSelectedItem()).toString());
 
-        // Get type from selected radio button
         int selectedTypeId = radioGroupType.getCheckedRadioButtonId();
         if (selectedTypeId != -1) {
             RadioButton selectedRadio = findViewById(selectedTypeId);
