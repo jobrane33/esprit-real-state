@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.realestateapp.CurrentPropertyData;
 import com.example.realestateapp.R;
 import com.example.realestateapp.adapters.CategoryAdapter;
 import com.example.realestateapp.adapters.HomeAdapter;
@@ -24,7 +25,7 @@ import com.example.realestateapp.model.Item;
 import com.example.realestateapp.screens.DetailsActivity;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-
+import com.example.realestateapp.listeners.ItemListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,22 +81,36 @@ public class HomeFragment extends Fragment {
 
     private void setupRecyclerView() {
         homeAdapter = new HomeAdapter(getContext(), filteredProperties, position -> {
+
+            //1. Get the item
             Item clickedItem = homeAdapter.getItem(position);
+
+            // --- DEBUG LOG ---
+            // This will print to Logcat so we know if the click works
+            android.util.Log.d("DEBUG_APP", "Clicked: " + clickedItem.getTitle());
+
+            // 2. SAVE DATA (This is the most important line!)
+            CurrentPropertyData.selectedProperty = clickedItem;
+
+            // --- DEBUG LOG ---
+            // Check if it was actually saved
+            if (CurrentPropertyData.selectedProperty != null) {
+                android.util.Log.d("DEBUG_APP", "Data saved successfully to helper.");
+            } else {
+                android.util.Log.e("DEBUG_APP", "CRITICAL ERROR: Data was NOT saved.");
+            }
+
+            // 3. Start Activity (Empty Intent)
             Intent intent = new Intent(getContext(), DetailsActivity.class);
-            intent.putExtra("location", clickedItem.getLocation());
-            intent.putExtra("price", clickedItem.getPrice());
-            intent.putExtra("shortdescription", clickedItem.getShortDescription());
-            intent.putExtra("description", clickedItem.getDescription());
-            intent.putExtra("contactno", clickedItem.getOwnerContact());
-            intent.putExtra("type", clickedItem.getType());
-            intent.putExtra("ownername", clickedItem.getOwnerName());
-            intent.putExtra("imageBase64", clickedItem.getImageUrl()); // <-- Base64
             startActivity(intent);
         });
 
         propertyRecyclerView.setAdapter(homeAdapter);
         propertyRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     }
+
+
+
 
     private void addStaticProperties() {
         allProperties.add(new Item("Villa in City Center","City Center","Luxury villa","$500,000",
