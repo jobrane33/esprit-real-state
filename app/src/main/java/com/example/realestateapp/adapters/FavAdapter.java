@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.realestateapp.CurrentPropertyData;
 import com.example.realestateapp.R;
 import com.example.realestateapp.model.FavProperty;
 import com.example.realestateapp.repository.FavoritesRepository; // NEW
@@ -47,44 +48,70 @@ public class FavAdapter extends RecyclerView.Adapter<FavAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         FavProperty fav = favorites.get(position);
+
         holder.title.setText(fav.getTitle());
         holder.location.setText(fav.getLocation());
         holder.price.setText(fav.getPrice());
 
-        // LOG
-        //android.util.Log.d("FavAdapter", "Loading Image for " + fav.getTitle() + ": " + fav.getImageuri());
-
-        // Image
+        // ---------------------------------------------------------
+        // FIX 1: HANDLE BASE64 IMAGES CORRECTLY
+        // ---------------------------------------------------------
         String imageUriString = fav.getImageuri();
 
-        try {
-            // 1. Try to convert the string to a number (Resource ID)
-            int resourceId = Integer.parseInt(imageUriString);
+        if (imageUriString != null && !imageUriString.isEmpty()) {
+            try {
+                // CASE A: Try to parse as a Resource ID (e.g. "213123085")
+                int resourceId = Integer.parseInt(imageUriString);
 
-            // If successful, load it as an Integer
-            Glide.with(context)
-                    .load(resourceId)
-                    .placeholder(R.drawable.villa)
-                    .into(holder.image);
+                Glide.with(context)
+                        .load(resourceId)
+                        .placeholder(R.drawable.villa)
+                        .into(holder.image);
 
-        } catch (NumberFormatException | NullPointerException e) {
-            // 2. If it's NOT a number (it's a real HTTP URL or null), load as String
-            Glide.with(context)
-                    .load(imageUriString)
-                    .placeholder(R.drawable.villa)
-                    .into(holder.image);
+            } catch (NumberFormatException e) {
+                // CASE B: It is NOT a number. It is likely a Base64 String.
+                try {
+                    // Clean string just in case
+                    String cleanBase64 = imageUriString.trim();
+
+                    // Decode Base64 to Bitmap
+                    byte[] decodedString = android.util.Base64.decode(cleanBase64, android.util.Base64.DEFAULT);
+                    android.graphics.Bitmap decodedByte = android.graphics.BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+
+                    // Load Bitmap into Glide
+                    Glide.with(context)
+                            .load(decodedByte)
+                            .placeholder(R.drawable.villa)
+                            .into(holder.image);
+
+                } catch (Exception ex) {
+                    // CASE C: It failed to decode (corrupted or normal URL).
+                    // Try loading as standard string URL as a last resort.
+                    Glide.with(context)
+                            .load(imageUriString)
+                            .placeholder(R.drawable.villa)
+                            .into(holder.image);
+                }
+            }
+        } else {
+            // String is null/empty
+            holder.image.setImageResource(R.drawable.villa);
         }
+        // ---------------------------------------------------------
+        // END OF IMAGE FIX
+        // ---------------------------------------------------------
 
 
+        // Delete Button
         holder.delete.setOnClickListener(v -> {
-            // 1. Check for valid ID before deleting
             if (fav.getContactno() != null) {
                 deleteFromFirestore(fav.getContactno(), holder.getAdapterPosition());
             } else {
                 Toast.makeText(context, "Error: Item ID missing", Toast.LENGTH_SHORT).show();
             }
         });
-        // --- FEATURE 2: SHARE PROPERTY (New) ---
+
+        // Share Button
         holder.share.setOnClickListener(v -> {
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType("text/plain");
@@ -94,22 +121,40 @@ public class FavAdapter extends RecyclerView.Adapter<FavAdapter.ViewHolder> {
             context.startActivity(Intent.createChooser(shareIntent, "Share via"));
         });
 
-        // --- FEATURE 3: CLICK ROW TO OPEN DETAILS (New) ---
+        // ---------------------------------------------------------
+        // FIX 2: PREVENT CRASH ON CLICK (Use Helper)
+        // ---------------------------------------------------------
         holder.itemView.setOnClickListener(v -> {
+            // We must convert 'FavProperty' to 'Item' to use our Helper
+            // assuming 'Item' is the class expected by CurrentPropertyData
+
+            // 1. Create a temporary Item object
+            // (Make sure to import com.example.realestateapp.models.Item)
+            com.example.realestateapp.model.Item tempItem = new com.example.realestateapp.model.Item();
+
+            // 2. Manually copy the data over
+            tempItem.setTitle(fav.getTitle());
+            tempItem.setPrice(fav.getPrice());
+            tempItem.setLocation(fav.getLocation());
+            tempItem.setShortDescription(fav.getShortDescription());
+            tempItem.setDescription(fav.getDescription());
+            tempItem.setOwnerContact(fav.getContactno());
+            tempItem.setType(fav.getType());
+            tempItem.setOwnerName(fav.getOwnername());
+
+            // IMPORTANT: Pass the image string (Base64 or ID) to the Item's ImageUrl field
+            // DetailsActivity looks at 'getImageUrl' for the base64 string.
+            tempItem.setImageUrl(fav.getImageuri());
+
+            // 3. Save to the Static Helper
+            CurrentPropertyData.selectedProperty = tempItem;
+
+            // 4. Open Activity (NO EXTRAS to avoid crash)
             Intent intent = new Intent(context, DetailsActivity.class);
-            // Pass all data back to details so it populates correctly
-            intent.putExtra("title", fav.getTitle());
-            intent.putExtra("price", fav.getPrice());
-            intent.putExtra("location", fav.getLocation());
-            intent.putExtra("shortdescription", fav.getShortDescription());
-            intent.putExtra("imageuri", fav.getImageuri());
-            intent.putExtra("description", fav.getDescription());
-            intent.putExtra("contactno", fav.getContactno());
-            intent.putExtra("type", fav.getType());
-            intent.putExtra("ownername", fav.getOwnername());
             context.startActivity(intent);
         });
     }
+
 
     private void deleteFromFirestore(String documentId, int position) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();

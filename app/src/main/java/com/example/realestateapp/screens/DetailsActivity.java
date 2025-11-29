@@ -116,7 +116,18 @@ public class DetailsActivity extends AppCompatActivity {
                 if (isFavorite) {
                     removeFromFavorites(contactno);
                 } else {
-                    addToFavorites(title, location, price, shortdescription, imageuri, description, contactno, type, ownername);
+                    String finalImageToSave;
+
+                    if (imageBase64 != null && !imageBase64.isEmpty()) {
+                        finalImageToSave = imageBase64;
+                    } else {
+                        finalImageToSave = imageuri;
+                    }
+
+                    // Pass 'finalImageToSave' as the 5th argument instead of just 'imageuri'
+                    addToFavorites(title, location, price, shortdescription, finalImageToSave, description, contactno, type, ownername);
+
+                    // --- FIX ENDS HERE ---
                 }
             });
 

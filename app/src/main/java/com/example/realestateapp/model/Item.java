@@ -14,6 +14,8 @@ public class Item {
     private String ownerContact;
     private String description;
 
+    public Item(){}
+
     // Constructor for Firebase image
     public Item(String title, String location, String shortDescription, String price,
                 String category, String type, String imageUrl,
